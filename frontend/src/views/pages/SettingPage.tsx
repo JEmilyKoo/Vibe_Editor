@@ -1,0 +1,390 @@
+import React, { useEffect, useMemo, useState } from 'react'
+
+import RocketIcon from '@/assets/icons/rocket.svg'
+
+import { Database } from '../../types/database'
+import type { Option } from '../../types/template'
+import { User } from '../../types/user'
+import { MessageType, WebviewPageProps } from '../../types/webview'
+import { formatTime } from '../../utils/formatTime'
+import { AIProviderModal } from '../components/aiProvider/AIProviderModal'
+import { AIProviderSelector } from '../components/aiProvider/AIProviderSelector'
+import { DBSelector } from '../components/database/DBSelector'
+import { DatabaseModal } from '../components/database/DatabaseModal'
+
+export function SettingPage({ postMessageToExtension }: WebviewPageProps) {
+  const [loginStatus, setLoginStatus] = useState(false)
+  const [user, setUser] = useState<User>({
+    notionActive: false,
+    lastLoginAt: '',
+    updatedAt: '',
+    createdAt: '',
+  })
+  const [showDbModal, setShowDbModal] = useState(false)
+  const [showAIProviderModal, setShowAIProviderModal] = useState(false)
+  const [showStartGuide, setShowStartGuide] = useState(false)
+
+  useEffect(() => {
+    console.log('로그인 스테이터스', loginStatus)
+    if (loginStatus) {
+      postMessageToExtension({ type: MessageType.GET_DATABASE })
+      postMesasgeTypeToExtension(MessageType.GET_USER)
+      postMessageToExtension({ type: MessageType.GET_OPTIONS })
+      postMessageToExtension({ type: MessageType.GET_CONFIG })
+    }
+  }, [loginStatus])
+
+  const computedUser = useMemo(() => {
+    if (user) {
+      return {
+        ...user,
+        lastLoginAt: formatTime(user.lastLoginAt),
+        createdAt: formatTime(user.createdAt),
+        updatedAt: formatTime(user.updatedAt),
+      }
+    }
+  }, [user])
+  const handleStartGuide = () => {
+    setShowStartGuide(!showStartGuide)
+    postMessageToExtension({
+      type: MessageType.START_GUIDE,
+      payload: showStartGuide,
+    })
+  }
+  const postMesasgeTypeToExtension = (type: MessageType) =>
+    postMessageToExtension({ type })
+
+  useEffect(() => {
+    postMesasgeTypeToExtension(MessageType.GET_LOGIN_STATUS)
+    const handleMessage = (event: MessageEvent) => {
+      const message = event.data
+      if (message.type === MessageType.LOGIN_STATUS_LOADED) {
+        setLoginStatus(message.payload)
+      } else if (message.type === MessageType.USER_LOADED) {
+        setUser(message.payload)
+      } else if (message.type === MessageType.OPTIONS_LOADED) {
+        setOptionList(message.payload)
+      } else if (message.type === MessageType.CONFIG_LOADED) {
+        console.log('message', message)
+        setSelectedOptionIds(message.payload.defaultPromptOptionIds ?? [])
+        setDefaultPostType(message.payload.defaultPostType ?? 'TECH_CONCEPT')
+        setDefaultNotionDatabaseId(message.payload.defaultNotionDatabaseId ?? 0)
+        setDefaultUserAIProviderId(message.payload.defaultUserAIProviderId ?? 0)
+        setShowStartGuide(message.payload.showStartGuide ?? false)
+      } else if (message.type === MessageType.GET_DATABASE) {
+        setNotionDbList(message.payload)
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
+  const [optionList, setOptionList] = useState<Option[]>([])
+  const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>([])
+  const [defaultPostType, setDefaultPostType] = useState('TECH_CONCEPT')
+  const [defaultNotionDatabaseId, setDefaultNotionDatabaseId] = useState(0)
+  const [notionDbList, setNotionDbList] = useState<Database[]>([])
+  const [defaultUserAIProviderId, setDefaultUserAIProviderId] = useState(0)
+
+  return (
+    <div className="min-h-screen w-full">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="text-2xl font-bold">Vibe Editor 설정</div>
+          <button
+            className="secondary-button transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
+            text-base font-medium px-3 py-1.5 rounded whitespace-pre-wrap"
+            onClick={() =>
+              postMessageToExtension({ type: MessageType.SHOW_README })
+            }>
+            이용 가이드
+          </button>
+        </div>
+        <div className="rounded-lg shadow-lg p-6">
+          <div className="space-y-8">
+            {loginStatus && (
+              <div className="space-y-8">
+                <h2 className="text-lg font-semibold border-b pb-4">
+                  유저 정보
+                </h2>
+                {computedUser && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="rounded-lg p-6 space-y-4 border">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <h3 className="text-sm font-medium">
+                            Notion 활성화 여부
+                          </h3>
+                        </div>
+                        <div
+                          className={
+                            computedUser.notionActive
+                              ? 'notion-status-active text-xs whitespace-pre-wrap'
+                              : 'notion-status-inactive text-xs whitespace-pre-wrap'
+                          }>
+                          {computedUser.notionActive ? '활성화' : '비활성화'}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <h3 className="text-sm font-medium">마지막 로그인</h3>
+                        </div>
+                        <div className="text-xs">
+                          {computedUser.lastLoginAt}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg p-6 space-y-4 border">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <h3 className="text-sm font-medium">가입일</h3>
+                        </div>
+                        <div className="text-xs">{computedUser.createdAt}</div>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <RocketIcon
+                            width={16}
+                            height={16}
+                          />
+                          <h3 className="text-sm font-medium">스타터</h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleStartGuide}
+                          className={
+                            showStartGuide
+                              ? 'notion-status-active test-xs'
+                              : 'notion-status-inactive text-xs'
+                          }>
+                          {showStartGuide ? '끄기' : '열기'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <button
+                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() =>
+                    postMesasgeTypeToExtension(
+                      MessageType.SET_NOTION_SECRET_KEY,
+                    )
+                  }>
+                  {computedUser?.notionActive
+                    ? 'Notion API 통합 토큰 변경'
+                    : ' Notion API 통합 토큰 등록'}
+                </button>
+                <h2 className="text-lg font-semibold border-b pb-4">
+                  기본 설정
+                </h2>
+                <DBSelector
+                  selectedId={defaultNotionDatabaseId}
+                  onChange={(id) => {
+                    setDefaultNotionDatabaseId(id)
+                    postMessageToExtension({
+                      type: MessageType.SET_CONFIG_VALUE,
+                      payload: {
+                        key: 'defaultNotionDatabaseId',
+                        value: id,
+                      },
+                    })
+                  }}
+                  getDatabases={() =>
+                    postMessageToExtension({ type: MessageType.GET_DATABASE })
+                  }
+                  onAddClick={() => setShowDbModal(true)}
+                />
+
+                {showDbModal && (
+                  <DatabaseModal
+                    saveDatabase={(database) =>
+                      postMessageToExtension({
+                        type: MessageType.SAVE_DATABASE,
+                        payload: database,
+                      })
+                    }
+                    onClose={() => setShowDbModal(false)}
+                  />
+                )}
+                <AIProviderSelector
+                  selectedId={defaultUserAIProviderId}
+                  onChange={(id) => {
+                    setDefaultUserAIProviderId(id)
+                    postMessageToExtension({
+                      type: MessageType.SET_CONFIG_VALUE,
+                      payload: {
+                        key: 'defaultUserAIProviderId',
+                        value: id,
+                      },
+                    })
+                  }}
+                  getAIProviders={() =>
+                    postMessageToExtension({
+                      type: MessageType.GET_AI_PROVIDERS,
+                    })
+                  }
+                  onAddClick={() => setShowAIProviderModal(true)}
+                />
+                {showAIProviderModal && (
+                  <AIProviderModal
+                    saveAIProvider={(aiProvider) =>
+                      postMessageToExtension({
+                        type: MessageType.SAVE_AI_PROVIDER,
+                        payload: aiProvider,
+                      })
+                    }
+                    onClose={() => setShowAIProviderModal(false)}
+                  />
+                )}
+
+                <div className="form-group">
+                  <label className="text-sm font-medium">포스트 종류</label>
+                  <select
+                    value={defaultPostType}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setDefaultPostType(value)
+                      postMessageToExtension({
+                        type: MessageType.SET_CONFIG_VALUE,
+                        payload: {
+                          key: 'defaultPostType',
+                          value: value,
+                        },
+                      })
+                    }}>
+                    <option value="TECH_CONCEPT">CS 개념</option>
+                    <option value="TROUBLE_SHOOTING">트러블 슈팅</option>
+                  </select>
+                </div>
+                {optionList.map((optionGroup) => (
+                  <div
+                    key={optionGroup.optionName}
+                    className="form-group">
+                    <label className="text-sm font-medium">
+                      {optionGroup.optionName}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {optionGroup.optionItems.map((item) => (
+                        <button
+                          key={item.optionId}
+                          onClick={() => {
+                            const groupOptionIds = optionGroup.optionItems.map(
+                              (o) => o.optionId,
+                            )
+                            const isSelected = selectedOptionIds.includes(
+                              item.optionId,
+                            )
+
+                            const updated = isSelected
+                              ? selectedOptionIds.filter(
+                                  (id) => !groupOptionIds.includes(id),
+                                )
+                              : [
+                                  ...selectedOptionIds.filter(
+                                    (id) => !groupOptionIds.includes(id),
+                                  ),
+                                  item.optionId,
+                                ]
+
+                            setSelectedOptionIds(updated)
+                            postMessageToExtension({
+                              type: MessageType.SET_CONFIG_VALUE,
+                              payload: {
+                                key: 'defaultPromptOptionIds',
+                                value: updated,
+                              },
+                            })
+                          }}
+                          className={`px-3 py-1 rounded-full text-sm ${
+                            selectedOptionIds.includes(item.optionId)
+                              ? 'selected'
+                              : 'unselected'
+                          }`}>
+                          {item.value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() =>
+                    postMesasgeTypeToExtension(MessageType.LOG_OUT)
+                  }>
+                  로그아웃
+                </button>
+              </div>
+            )}
+            {!loginStatus && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold border-b pb-4">로그인</h2>
+                <button
+                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() =>
+                    postMesasgeTypeToExtension(MessageType.GOOGLE_LOGIN)
+                  }>
+                  구글 로그인
+                </button>
+                <button
+                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() =>
+                    postMesasgeTypeToExtension(MessageType.GITHUB_LOGIN)
+                  }>
+                  깃허브 로그인
+                </button>
+                <button
+                  className="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() =>
+                    postMesasgeTypeToExtension(MessageType.SSAFY_LOGIN)
+                  }>
+                  싸피 로그인
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

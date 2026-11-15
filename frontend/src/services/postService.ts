@@ -1,0 +1,240 @@
+import * as vscode from 'vscode'
+
+import {
+  deletePost,
+  getPostDetail,
+  getPostList,
+  upgradePost,
+  uploadPost,
+} from '../apis/post'
+import { getDraftData, setDraftData } from '../configuration/draftData'
+import { DraftDataType } from '../types/configuration'
+import { Post, PostDetail, UploadToNotionRequestPost } from '../types/post'
+import { isLoading } from '../utils/isLoading'
+import { refreshPostProvider } from '../views/tree/postTreeView'
+
+export class PostService {
+  private context: vscode.ExtensionContext
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context
+  }
+
+  async resetPost(): Promise<void> {
+    await this.context.globalState.update('posts', [])
+    refreshPostProvider()
+  }
+
+  async updatePostToExtension(prev: PostDetail[]): Promise<void> {
+    await this.context.globalState.update('posts', prev)
+    refreshPostProvider()
+  }
+
+  async createPost(postId: number): Promise<void> {
+    const newPost: PostDetail = {
+      postId: postId,
+      postTitle: `임시 포스트 제목 ${postId}`,
+      postContent: '임시 포스트 내용입니다.',
+      templateId: 0,
+      promptId: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      parentPostIdList: [],
+    }
+    const prev = this.context.globalState.get<PostDetail[]>('posts', [])
+    prev.push(newPost)
+    await this.context.globalState.update('posts', prev)
+    refreshPostProvider()
+    vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `포스트가 생성되었습니다: ${newPost.postTitle}`,
+        cancellable: false,
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      },
+    )
+  }
+
+  async deletePost(postId: number): Promise<void> {
+    const result = await deletePost(postId)
+
+    if (result.success) {
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `포스트가 삭제되었습니다.`,
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
+
+      setDraftData(DraftDataType.selectedPostId, 0) // 선택된 포스트 ID 초기화 (필요시)
+      await this.getPosts()
+      refreshPostProvider()
+    } else {
+      vscode.window.showErrorMessage(`포스트 삭제에 실패했습니다.`)
+    }
+  }
+
+  async getSelectedPostId(): Promise<number> {
+    let selectedPostId = getDraftData<number>(DraftDataType.selectedPostId)
+    if (selectedPostId) {
+      return selectedPostId
+    } else {
+      const posts = await this.getPosts()
+      if (posts.length > 0) {
+        selectedPostId = posts[0].postId
+        setDraftData(DraftDataType.selectedPostId, posts[0].postId)
+        return posts[0].postId
+      }
+    }
+    return 0
+  }
+  async getCurrentPost(): Promise<PostDetail | null> {
+    const postId = await this.getSelectedPostId()
+    if (postId) {
+      return await this.getPost(postId)
+    }
+    return null
+  }
+
+  async getPost(postId: number): Promise<PostDetail | null> {
+    console.log('getPost', postId)
+    const isLoad = isLoading(postId)
+    console.log('isLoad', isLoad)
+
+    const prev = await this.getLocalPosts()
+
+    if (!isLoad) {
+      const result = await getPostDetail(postId)
+      console.log(' getPostDetail result', result)
+      if (!result.success) {
+        vscode.window.showErrorMessage(
+          `포스트 ${postId}를 불러오는 데 실패했습니다.`,
+        )
+        return null
+      }
+      const post = result.data
+      const index = prev.findIndex((p) => p.postId === postId)
+      const updatedPost: PostDetail = {
+        ...post,
+        parentPostIdList: prev[index]?.parentPostIdList ?? [],
+        uploadStatus: prev[index]?.uploadStatus, // 필요 시 보존
+      }
+      if (index !== -1) {
+        prev[index] = updatedPost
+      } else {
+        prev.push(updatedPost)
+      }
+      await this.updatePostToExtension(prev)
+    }
+    const localPost = this.getLocalPost(postId, prev)
+    return localPost
+  }
+
+  async getLocalPosts(): Promise<PostDetail[]> {
+    return this.context.globalState.get<PostDetail[]>('posts') || []
+  }
+  async getPosts(): Promise<PostDetail[]> {
+    const prev = await this.getLocalPosts()
+    const loadingPrev = prev.filter((p) => isLoading(p.postId))
+
+    const result = await getPostList()
+    let posts: PostDetail[] = []
+    if (result.success) {
+      posts = result.data
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+        .map((post) => {
+          const localPost = prev.find((p) => p.postId === post.postId)
+          if (localPost) {
+            localPost.postTitle = post.postTitle
+            localPost.createdAt = post.createdAt
+            localPost.updatedAt = post.updatedAt
+            localPost.uploadStatus = post.uploadStatus
+            return localPost
+          } else {
+            return {
+              postId: post.postId,
+              postTitle: post.postTitle,
+              postContent: '',
+              templateId: 0,
+              promptId: 0,
+              createdAt: post.createdAt,
+              updatedAt: post.updatedAt,
+              parentPostIdList: [],
+              uploadStatus: post.uploadStatus,
+            }
+          }
+        })
+      loadingPrev?.forEach((item) => prev.push(item))
+      await this.updatePostToExtension(posts)
+    }
+    return posts
+  }
+  async getLocalPost(
+    postId: number,
+    prev?: PostDetail[],
+  ): Promise<PostDetail | null> {
+    const posts = prev || (await this.getLocalPosts())
+    return postId ? posts.find((post) => post.postId === postId) || null : null
+  }
+
+  async updatePost(data: Post): Promise<boolean> {
+    const prev = await this.getLocalPosts()
+    const updated = prev.map((post) =>
+      post.postId === data.postId ? { ...post, ...data } : post,
+    )
+    await this.context.globalState.update('posts', updated)
+    const success = await upgradePost({
+      postId: data.postId,
+      updatePost: {
+        postContent: data.postContent,
+        postTitle: data.postTitle,
+      },
+    })
+    if (success) {
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: '포스트가 업데이트되었습니다.',
+          cancellable: false,
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+        },
+      )
+      return true
+    }
+    refreshPostProvider()
+    return false
+  }
+  async submitToNotion(data: UploadToNotionRequestPost): Promise<string> {
+    // 실제로는 data.promptId를 백엔드에 보내서 postContent 등을 받아야 함
+    const result = await uploadPost(data)
+    let postUrl = 'http://www.naver.com'
+    if (result.success) {
+      postUrl = result.data.postUrl
+    }
+    const prev = await this.getLocalPosts()
+    const filtered = prev.filter((post) => !isLoading(post.postId))
+    await this.context.globalState.update('posts', filtered)
+    refreshPostProvider()
+    return postUrl
+  }
+  moveToNotion = (postUrl: string) => {
+    vscode.window
+      .showInformationMessage(
+        'Notion이 생성되었습니다. 해당 페이지로 이동하시겠습니까?',
+        { modal: true },
+        'Ok',
+      )
+      .then(async (selection) => {
+        if (selection === 'Ok') {
+          await vscode.env.openExternal(vscode.Uri.parse(postUrl))
+        }
+      })
+  }
+}

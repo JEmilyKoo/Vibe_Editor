@@ -1,0 +1,194 @@
+@import 'tailwindcss';
+
+body {
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: var(--vscode-editor-background);
+}
+
+.app-container {
+  /* max-width: 800px; */
+  margin: 0 auto;
+}
+.tab {
+  background-color: var(--vscode-sideBar-background);
+}
+h1 {
+  color: var(--vscode-editor-foreground);
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.template-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+label {
+  color: var(--vscode-editor-foreground);
+}
+
+input,
+textarea,
+select {
+  padding: 8px;
+  border: 1px solid var(--vscode-input-border);
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border-radius: 4px;
+}
+
+textarea {
+  min-height: 100px;
+  font-family: var(--vscode-editor-font-family);
+}
+
+.profile {
+  border-radius: 9999px;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+}
+
+button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+}
+
+button.sendButton {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+}
+
+button.sendButton:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+button.selected {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-background);
+}
+
+button.unselected {
+  background: var(--vscode-button-foreground);
+  color: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
+}
+
+button:hover:not(.unselected) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.startGuideListItem.selected {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-background);
+}
+.startGuideListItem.unselected {
+  background: var(--vscode-button-foreground);
+  color: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
+}
+.startGuidListItem:hover:not(.unselected) {
+  background: var(--vscode-button-hoverBackground);
+}
+.startGuidListItem:hover:not(.selected) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.info.dark {
+  color: var(--vscode-editor-foreground);
+}
+
+.info.white {
+  color: var(--vscode-button-background);
+}
+
+.infoText {
+  background: var(--vscode-button-hoverBackground);
+  color: var(--vscode-button-foreground);
+}
+
+.border {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--vscode-editorWidget-border);
+}
+
+.small-square-button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.notion-status-active {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border-radius: 9999px; /* rounded-full 효과 */
+  padding: 4px 12px;
+  font-size: 0.875rem; /* text-sm */
+}
+
+.notion-status-inactive {
+  background: var(--vscode-button-foreground);
+  color: var(--vscode-button-background) !important;
+  border: 1px solid var(--vscode-button-background);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 0.875rem;
+}
+
+.vscode-overlay-background {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* TOAST UI Editor 전체 배경 흰색으로 고정 */
+.toastui-editor-defaultUI {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* 에디터 내부 콘텐츠 영역 배경도 흰색으로 고정 */
+.toastui-editor-contents {
+  background-color: white !important;
+  color: black !important;
+}
+.secondary-button {
+  padding: 4px 8px;
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.secondary-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}

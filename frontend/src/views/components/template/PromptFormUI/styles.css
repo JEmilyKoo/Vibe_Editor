@@ -1,0 +1,99 @@
+.template-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: var(--vscode-font-family);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--vscode-editor-foreground);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+}
+
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--vscode-dropdown-border);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  cursor: pointer;
+}
+
+.form-group select option {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.code-editor {
+  font-family: var(--vscode-editor-font-family);
+  min-height: 200px;
+}
+
+.submit-button {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+.submit-button:active {
+  background-color: var(--vscode-button-background);
+  opacity: 0.8;
+}
+
+.code-block {
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  font-family: var(--vscode-editor-font-family);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow: hidden;
+  border: 1px solid var(--vscode-input-border);
+  overflow-y: auto;
+  overflow: hidden;
+  width: 100%;
+  pre code.hljs {
+    max-height: 30vh;
+    overflow-y: auto;
+    width: calc(100vw - 84px);
+    max-width: calc(100vw - 84px);
+  }
+}
+
+.code-block code {
+  color: var(--vscode-editor-foreground);
+  font-size: 14px;
+}

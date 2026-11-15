@@ -1,0 +1,24 @@
+.template-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: var(--vscode-font-family);
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--vscode-editor-foreground);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}

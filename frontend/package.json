@@ -1,0 +1,540 @@
+{
+  "name": "vibe-editor",
+  "icon": "media/icon.png",
+  "displayName": "vibeditor",
+  "description": "add code snippet to notion",
+  "publisher": "VibeEditor",
+  "version": "1.0.6",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onChatParticipant:vibeEditor.aiChat"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vibeEditorViewer",
+          "title": "vibeEditor",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "vibeEditor.captureCodeSnapshot",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "vibeEditor.copyCode",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l",
+        "when": "terminalFocus"
+      },
+      {
+        "command": "vibeEditor.exportDirectoryTreeSnapshot",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g",
+        "when": "explorerFocus"
+      },
+      {
+        "command": "vibeEditor.openChat",
+        "key": "ctrl+shift+f7",
+        "mac": "cmd+shift+f7"
+      }
+    ],
+    "views": {
+      "vibeEditorViewer": [
+        {
+          "type": "webview",
+          "id": "vibeEditorViewerPage",
+          "name": "Vibe Editor 스타터",
+          "when": "vibeEditor.showStartGuide == true",
+          "icon": "media/icon.svg"
+        },
+        {
+          "id": "vibeEditorPostList",
+          "name": "포스트 목록",
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == true && vibeEditor.draftData.selectedPage != 'TEMPLATE'"
+        },
+        {
+          "id": "vibeEditorTemplatePage",
+          "name": "에픽 목록",
+          "icon": "media/icon.svg",
+          "when": "vibeEditor.draftData.loginStatus == true  && vibeEditor.draftData.selectedPage != 'POST'"
+        },
+        {
+          "type": "webview",
+          "id": "vibeEditorSideView",
+          "name": "Vibe Editor Side View",
+          "icon": "media/icon.svg"
+        },
+        {
+          "type": "webview",
+          "id": "vibeEditorAIChatView",
+          "name": "AI Chat",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "vibeEditor.googleLogin",
+        "title": "Google 로그인",
+        "when": "vibeEditor.draftData.loginStatus == false",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.githubLogin",
+        "title": "GitHub 로그인",
+        "when": "vibeEditor.draftData.loginStatus == false",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.ssafyLogin",
+        "title": "SSAFY 로그인",
+        "when": "vibeEditor.draftData.loginStatus == false",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.logout",
+        "title": "로그아웃",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.showPostPage",
+        "title": "포스트 보기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.copyCode",
+        "title": "복사한 로그 스냅샷 촬영하기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor",
+        "icon": "$(add)"
+      },
+      {
+        "command": "vibeEditor.exportDirectoryTreeSnapshot",
+        "title": "디렉토리 구조 내보내기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.importLogSnapshot",
+        "title": "로그 스냅샷 가져오기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.captureCodeSnapshot",
+        "title": "코드 스냅샷 촬영",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.setNotionApi",
+        "title": "Notion API 통합 토큰 키 등록",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.renameTemplate",
+        "title": "에픽 이름 바꾸기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.deleteTemplate",
+        "title": "에픽 삭제",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "icon": "$(trash)",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.createTemplate",
+        "title": "새 에픽 생성",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor",
+        "icon": "$(add)"
+      },
+      {
+        "command": "vibeEditor.showTemplatePage",
+        "title": "스토리 페이지 보기",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.resetTemplate",
+        "title": "에픽 초기화",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.addToPrompt",
+        "title": "스토리에 추가하기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "icon": "$(go-to-editing-session)"
+      },
+      {
+        "command": "vibeEditor.deleteSnapshot",
+        "title": "스냅샷 삭제하기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "vibeEditor.renameSnapshot",
+        "title": "스냅샷 이름 바꾸기",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.refreshSnapshot",
+        "title": "스냅샷 새로 고침",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.captureFileSnapshot",
+        "title": "파일 스냅샷 촬영",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "category": "Vibe Editor"
+      },
+      {
+        "command": "vibeEditor.openNotionLink",
+        "title": "Notion 바로가기",
+        "icon": "$(link-external)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.deletePost",
+        "title": "포스트 삭제하기",
+        "icon": "$(trash)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.showSettingPage",
+        "title": "Vibe Editor 설정",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "vibeEditor.showSideViewPage",
+        "title": "Vibe Editor 보기",
+        "icon": "$(wand)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.showDefaultPostPage",
+        "title": "포스트 보기",
+        "icon": "$(wand)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.showDefaultTemplatePage",
+        "title": "스토리 보기",
+        "icon": "$(notebook)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.generatePost",
+        "title": "AI 포스트 생성",
+        "icon": "$(wand)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.createPost",
+        "title": "포스트 목록 일괄",
+        "icon": "$(wand)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.closeStartGuide",
+        "title": "스타터 닫기",
+        "icon": "$(close)"
+      },
+      {
+        "command": "vibeEditor.openStartGuide",
+        "title": "스타터 열기",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "vibeEditor.resetStartGuide",
+        "title": "스타터 새로고침",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "vibeEditor.openChat",
+        "title": "AI 채팅 열기",
+        "category": "Vibe Editor",
+        "icon": "$(comment-discussion)",
+        "when": "vibeEditor.draftData.loginStatus == true"
+      },
+      {
+        "command": "vibeEditor.insertSnapshotToChat",
+        "title": "스냅샷 채팅에 추가하기",
+        "category": "Vibe Editor",
+        "when": "vibeEditor.draftData.loginStatus == true",
+        "icon": "$(comment-discussion)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "vibeEditor.showDefaultPostPage",
+          "when": "view == vibeEditorSideView && vibeEditor.draftData.loginStatus == true",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vibeEditor.showDefaultTemplatePage",
+          "when": "view == vibeEditorSideView && vibeEditor.draftData.loginStatus == true",
+          "group": "navigation@2"
+        },
+        {
+          "command": "vibeEditor.openChat",
+          "when": "view == vibeEditorSideView && vibeEditor.draftData.loginStatus == true",
+          "group": "navigation@3"
+        },
+        {
+          "command": "vibeEditor.showSettingPage",
+          "when": "view == vibeEditorSideView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "vibeEditor.createTemplate",
+          "when": "view == vibeEditorTemplatePage && vibeEditor.draftData.loginStatus == true",
+          "group": "navigation"
+        },
+        {
+          "command": "vibeEditor.resetStartGuide",
+          "when": "view == vibeEditorViewerPage",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vibeEditor.closeStartGuide",
+          "when": "view == vibeEditorViewerPage",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "vibeEditor.insertSnapshotToChat",
+          "when": "viewItem == vibeEditorSnapshot || viewItem == vibeEditorSelectedSnapshot",
+          "group": "inline@1"
+        },
+        {
+          "command": "vibeEditor.deleteTemplate",
+          "when": "viewItem == vibeEditorTemplatePage",
+          "group": "inline@3"
+        },
+        {
+          "command": "vibeEditor.renameTemplate",
+          "when": "viewItem == vibeEditorTemplatePage"
+        },
+        {
+          "command": "vibeEditor.renameSnapshot",
+          "when": "viewItem == vibeEditorSnapshot || viewItem == vibeEditorSelectedSnapshot",
+          "group": "navigation"
+        },
+        {
+          "command": "vibeEditor.deleteSnapshot",
+          "when": "viewItem == vibeEditorSnapshot || viewItem == vibeEditorSelectedSnapshot",
+          "group": "inline@2"
+        },
+        {
+          "command": "vibeEditor.openNotionLink",
+          "when": "viewItem == vibeEditorPostURLList",
+          "group": "inline@0"
+        },
+        {
+          "command": "vibeEditor.deletePost",
+          "when": "viewItem == vibeEditorPostList || viewItem == vibeEditorPostURLList",
+          "group": "inline@1"
+        },
+        {
+          "command": "vibeEditor.generatePost",
+          "when": "viewItem == vibeEditorPrompt",
+          "group": "navigation"
+        },
+        {
+          "command": "vibeEditor.addToPrompt",
+          "when": "viewItem == vibeEditorSelectedSnapshot",
+          "group": "inline@1"
+        },
+        {
+          "command": "vibeEditor.copyCode",
+          "when": "viewItem == vibeEditorCategory",
+          "group": "navigation"
+        }
+      ],
+      "terminal/context": [
+        {
+          "command": "vibeEditor.copyCode"
+        }
+      ],
+      "terminal/title/context": [
+        {
+          "command": "vibeEditor.copyCode"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "vibeEditor.captureCodeSnapshot",
+          "when": "editorHasSelection",
+          "group": "vibeEditor"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "vibeEditor.exportDirectoryTreeSnapshot",
+          "when": "explorerResourceIsFolder",
+          "group": "vibeEditor"
+        },
+        {
+          "command": "vibeEditor.captureFileSnapshot",
+          "when": "explorerResourceIsFolder == false",
+          "group": "vibeEditor"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Vibe Editor",
+      "properties": {
+        "vibeEditor.selectedTemplateId": {
+          "type": "number",
+          "default": 0,
+          "description": "선택된 에픽 ID"
+        },
+        "vibeEditor.selectedPromptId": {
+          "type": "number",
+          "default": 0,
+          "description": "선택된 스토리 ID"
+        },
+        "vibeEditor.defaultPostType": {
+          "type": "string",
+          "enum": [
+            "TECH_CONCEPT",
+            "TROUBLE_SHOOTING"
+          ],
+          "default": "TECH_CONCEPT",
+          "description": "기본 포스트 종류"
+        },
+        "vibeEditor.defaultPromptOptionIds": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [],
+          "description": "기본 선택 옵션 ID 목록"
+        },
+        "vibeEditor.defaultNotionDatabaseId": {
+          "type": "number",
+          "default": 0,
+          "description": "기본 Notion 데이터베이스 ID"
+        },
+        "vibeEditor.defaultUserAIProviderId": {
+          "type": "number",
+          "default": 0,
+          "description": "기본 AI 선택"
+        },
+        "vibeEditor.showReadme": {
+          "type": "boolean",
+          "default": true,
+          "description": "README 파일 보이기 여부"
+        },
+        "vibeEditor.showStartGuide": {
+          "type": "boolean",
+          "default": true,
+          "description": "스타터 보이기 여부"
+        }
+      }
+    },
+    "chatParticipants": [
+      {
+        "id": "vibeEditor.aiChat",
+        "fullName": "Vibe Editor AI Chat",
+        "name": "vibeEditorAiChat",
+        "description": "Vibe Editor AI와 대화하세요",
+        "isSticky": true
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm-run-all compile:*",
+    "watch": "npm-run-all -p watch:*",
+    "compile:extension": "tsc -p ./",
+    "compile:view": "webpack --stats detailed",
+    "watch:extension": "tsc -watch -p ./",
+    "watch:view": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./dist/test/runTest.js"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.4",
+    "@toast-ui/editor": "^3.2.2",
+    "@toast-ui/editor-plugin-code-syntax-highlight": "^3.1.0",
+    "axios": "^1.9.0",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^1.3.7",
+    "highlight.js": "^11.11.1",
+    "marked": "^15.0.11",
+    "prismjs": "^1.30.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.56.1",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.5.1",
+    "react-spinners": "^0.17.0",
+    "shiki": "^3.3.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.25.1",
+    "@svgr/webpack": "^8.1.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/dompurify": "^3.0.5",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/vscode": "^1.99.1",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "autoprefixer": "^10.4.21",
+    "css-loader": "^7.1.2",
+    "eslint": "^9.23.0",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "glob": "^11.0.1",
+    "mocha": "^11.1.0",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.5.3",
+    "postcss-loader": "^8.1.1",
+    "prettier": "^3.5.3",
+    "redux-logger": "^3.0.6",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^4.1.4",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "vscode-test": "^1.6.1",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  }
+}

@@ -1,0 +1,195 @@
+.template-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: var(--vscode-font-family);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--vscode-editor-foreground);
+}
+
+.form-group input,
+.form-group textarea .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: var(--vscode-editor-font-family);
+}
+
+.code-editor {
+  font-family: 'Courier New', Courier, monospace;
+  min-height: 200px;
+}
+
+.submit-button {
+  background-color: var(--vscode-button-background) !important;
+  color: var(--vscode-button-foreground) !important;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: var(--vscode-button-hoverBackground) !important;
+}
+
+.submit-button:active {
+  background-color: #00508a;
+}
+
+.viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.viewer-toggle-button {
+  padding: 4px 8px;
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.viewer-toggle-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+.secondary-button {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border);
+}
+
+.secondary-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+.markdown-viewer {
+  padding: 12px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+  min-height: 200px;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  overflow-y: auto;
+}
+
+.markdown-viewer h1,
+.markdown-viewer h2,
+.markdown-viewer h3,
+.markdown-viewer h4,
+.markdown-viewer h5,
+.markdown-viewer h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--vscode-editor-foreground);
+}
+
+.markdown-viewer p {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--vscode-editor-foreground);
+}
+
+.markdown-viewer code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: var(--vscode-textCodeBlock-background);
+  color: var(--vscode-editor-foreground);
+  border-radius: 3px;
+}
+
+.markdown-viewer pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: var(--vscode-textCodeBlock-background);
+  border-radius: 3px;
+}
+
+.markdown-viewer blockquote {
+  padding: 0 1em;
+  color: var(--vscode-descriptionForeground);
+  border-left: 0.25em solid var(--vscode-input-border);
+  margin: 0 0 16px 0;
+}
+
+.markdown-viewer ul,
+.markdown-viewer ol {
+  padding-left: 2em;
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--vscode-editor-foreground);
+}
+
+.markdown-viewer table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin: 16px 0;
+  border: 1px solid var(--vscode-input-border);
+}
+
+.markdown-viewer table th,
+.markdown-viewer table td {
+  padding: 6px 13px;
+  border: 1px solid var(--vscode-input-border);
+  color: var(--vscode-editor-foreground);
+}
+
+.markdown-viewer table tr {
+  background-color: var(--vscode-editor-background);
+  border-top: 1px solid var(--vscode-input-border);
+}
+
+.markdown-viewer table tr:nth-child(2n) {
+  background-color: var(--vscode-editor-inactiveSelectionBackground);
+}
+
+/* Prism.js 스타일 오버라이드 */
+.markdown-viewer pre[class*='language-'] {
+  color: var(--vscode-editor-foreground);
+  background: var(--vscode-textCodeBlock-background);
+  text-shadow: none;
+  font-family: var(--vscode-editor-font-family);
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
+}
+
+.markdown-viewer code[class*='language-'] {
+  color: var(--vscode-editor-foreground);
+  text-shadow: none;
+}
