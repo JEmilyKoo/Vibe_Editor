@@ -152,14 +152,14 @@ export class AuthService {
         },
       )
       server.listen(PORT)
+      const { CLIENT_ID, API_DOMAIN } = process.env;
 
-      await vscode.env.openExternal(
-        vscode.Uri.parse(
-          domain === 'ssafy'
-            ? `https://project.ssafy.com/oauth/sso-check?client_id=74261878-69ac-4133-9729-39dff3a38aca&redirect_uri=https://vibeeditor.site/api/v1/user/login/ssafy/callback&response_type=code`
-            : `https://vibeeditor.site/oauth2/authorization/${domain}`,
-        ),
-      )
+      const authUrl =
+        domain === 'ssafy'
+          ? `https://project.ssafy.com/oauth/sso-check?client_id=${CLIENT_ID}&redirect_uri=https://${API_DOMAIN}/api/v1/user/login/ssafy/callback&response_type=code`
+          : `https://${API_DOMAIN}/oauth2/authorization/${domain}`;
+          
+      await vscode.env.openExternal(vscode.Uri.parse(authUrl));
     } catch (error) {
       vscode.window.showErrorMessage(`${domain} 로그인 실패`)
       console.error(error)
